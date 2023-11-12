@@ -4,51 +4,52 @@ using namespace std;
 
 class Solution {
 public:
-    int p = 0;
     bool isNumber(string s) {
+        int p = 0, f = 0;
         
-        while (s[p] == ' ')
+        while (p < s.size())
         {
-            p++;
-        }
+            if(p == '.'){
+                int valid = hasValidNum(string(s.begin() + f, s.begin() + f + p));
+                if(valid == -1){
+                    return false;
+                }else if (valid == 0)
+                {
+                    p++;
+                    f = p;
+                }else{
+                    p++;
+                    f = p;
+                }
+                
+            }else if(p == 'e' || p == 'E'){
 
-        if(getInt(s))
-        
+            }
+        }
         
     }
 
-    bool getInt(string s){
-        int i = p;
+    //-1 invalid 0 none 1 have
+    int hasValidNum(string s){
+        int p = 0;
+        while (p < s.size() && s[p] == ' ')
+        {
+            p++;
+        }
+        
         if(s[p] == '+' || s[p] == '-'){
             p++;
-            i = p;
         }
-        while (p < s.size() && isNum(s[p]))
-        {
-            p++;
-        }
-        if(i == p){
-            p = s[p] == '+' || s[p] == '-' ? i-1 : i;
-            return false;
-        }
-        return true;
-    }
 
-    bool getFl(string s){
-        int i = p; bool hasNum;
-        if(s[p] == '+' || s[p] == '-'){
-            p++;
-            i == p;
-        }
-        while (p < s.size() && isNum(s[p]))
+        if(p == s.size()) return 0;
+        while (p < s.size())
         {
-            p++;
-            hasNum = true;
+            if(s[p] >= '0' || s[p] <= '9'){
+                p++;
+            }else{
+                return -1;
+            }
         }
-        if(p < s.size() && p[s] == )
-    }
-
-    bool isNum(char c){
-        return c >= '0' && c <= '9';
+        return p == s.size();
     }
 };
