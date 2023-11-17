@@ -6,6 +6,15 @@ class Point{
 public:
     int x;
     int y;
+    bool left = false;
+    bool right = false;
+    bool up = false;
+    bool down = false;
+    
+    bool walkable;
+
+    int dis = 0;
+
     Point(int _x, int _y){
         x = _x;
         y = _y;
@@ -13,25 +22,25 @@ public:
     Point(){}
 };
 
-class stack{    
+template<typename T> class stack{    
 public:
     stack(){
         pointer = -1;
     }
-    void push(Point p){
+    void push(T p){
         ps[++pointer] = p;
     }
     void pop(){
         pointer--;
     }
-    Point top(){
+    T top(){
         return ps[pointer];
     }
     int size(){
         return pointer + 1;
     }
 
-    Point ps[100];
+    T ps[1005];
 private:
     int pointer;
 };
@@ -39,64 +48,92 @@ private:
 int main(){
     int m, n;
     cin >> m >> n;
-    stack st;
-    stack ans;
+    stack<Point*> st;
+    stack<Point*> ans;
 
-    int mize[m][n];
-    bool hasChecked[m][n] = {false};
+    Point* mize[m][n];
+
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            cin >> mize[i][j];
+            mize[i][j] = new Point(i, j);
+            int a;
+            cin >> a;
+            mize[i][j]->walkable = a == 0 ? true : false;
         }
     }
 
-    st.push(Point(0, 0));
-    hasChecked[0][0] = true;
+    st.push(mize[0][0]);
+
     while (st.size() >= 1)
     {
-        if(st.top().x == m - 1 && st.top().y == n - 1){
+        if(st.top()->x == m - 1 && st.top()->y == n - 1){
             if(ans.size() == 0 || ans.size() > st.size()) ans = st;
-            st.pop();
+            st.top()->dis = st.size() - 1;
+            st.top()->walkable = true;
             st.pop();
         }
 
-        Point p = Point(st.top().x, st.top().y);
+        Point* p = mize[st.top()->x][st.top()->y];
+        //left
+        if (p->x > 0 && mize[p->x - 1][p->y]->walkable && (!p->left || mize[p->x - 1][p->y]->dis > st.size()))
+        {
+            st.push(mize[p->x - 1][p->y]);
+            mize[p->x - 1][p->y]->walkable = false;
+            p->left = true;
+        }
         //right
-        if(p.x < m-1 && mize[p.x + 1][p.y] == 0 && !hasChecked[p.x + 1][p.y]){
-            st.push(Point(p.x + 1, p.y));
-            hasChecked[p.x + 1][p.y] = true;
-        }//down
-        else if (p.y < n-1 && !mize[p.x][p.y + 1] && !hasChecked[p.x][p.y + 1])
-        {
-            st.push(Point(p.x, p.y + 1));
-            hasChecked[p.x][p.y + 1] = true;
-        }//left
-        else if (p.x > 0 && !mize[p.x - 1][p.y] && !hasChecked[p.x - 1][p.y])
-        {
-            st.push(Point(p.x - 1, p.y));
-            hasChecked[p.x - 1][p.y] = true;
+        else if(p->x < m-1 && mize[p->x + 1][p->y]->walkable && (!p->right || mize[p->x + 1][p->y]->dis > st.size())){
+            st.push(mize[p->x + 1][p->y]);
+            mize[p->x + 1][p->y]->walkable = false;
+            p->right = true;
         }//up
-        else if (p.y > 0 && !mize[p.x][p.y - 1] && !hasChecked[p.x][p.y - 1])
+        else if (p->y > 0 && mize[p->x][p->y - 1]->walkable && (!p->up || mize[p->x][p->y - 1]->dis > st.size()))
         {
-            st.push(Point(p.x, p.y - 1));
-            hasChecked[p.x][p.y - 1] = true;
-        }else if(st.size() > 1){
+            st.push(mize[p->x][p->y - 1]);
+            mize[p->x][p->y - 1]->walkable = false;
+            p->up = true;
+        }//down
+        else if (p->y < n-1 && mize[p->x][p->y + 1]->walkable && (!p->down || mize[p->x][p->y + 1]->dis > st.size()))
+        {
+            st.push(mize[p->x][p->y + 1]);
+            mize[p->x][p->y + 1]->walkable = false;
+            p->down = true;
+        }
+        else{
+            st.top()->dis = st.size() - 1;
+            st.top()->walkable = true;
             st.pop();
-        }else if(ans.size() == 0){
-            cout << -1;
-            return 0;
-        }else{
-            cout << "(0,0)";
-            for (int i = 1; i < ans.size(); i++)
-            {
-                cout << endl;
-                cout << '(' << ans.ps[i].x << "," << ans.ps[i].y << ")";
-            }
-            return 0;
         }
     }
     
+    if(ans.size() > 0){
+        cout << "(0,0)";
+        for (int i = 1; i < ans.size(); i++)
+        {
+            cout << endl;
+            cout << '(' << ans.ps[i]->x << "," << ans.ps[i]->y << ")";
+        }
+    }else{
+        cout << "-1";
+    }
+    
+    return 0;
     
 }
+
+// else if(st.size() > 1){
+//             st.pop();
+//         }else if(ans.size() == 0){
+//             cout << -1;
+//             return 0;
+//         }else{
+//             cout << "(0,0)";
+//             for (int i = 1; i < ans.size(); i++)
+//             {
+//                 cout << endl;
+//                 cout << '(' << ans.ps[i].x << "," << ans.ps[i].y << ")";
+//             }
+//             return 0;
+//         }
